@@ -1,10 +1,13 @@
 package config
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/ScooballyD/gator/internal/database"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -15,6 +18,7 @@ type Config struct {
 }
 
 type State struct {
+	dbq   *database.Queries
 	point *Config
 }
 
@@ -26,6 +30,17 @@ func (cfg Config) NewState() (State, error) {
 	if s.point == nil {
 		return State{}, errors.New("failed to create new state")
 	}
+
+	db, err := sql.Open("postgres", cfg.Db_url)
+	if err != nil {
+		return State{}, fmt.Errorf("failed to open database: %v", err)
+	}
+	dbQueries := database.New(db)
+	s.dbq = dbQueries
+	if s.dbq == nil {
+		return State{}, errors.New("failed to assign dbQueries to state")
+	}
+
 	return s, nil
 }
 

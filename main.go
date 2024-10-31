@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ScooballyD/gator/internal/config"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -24,6 +25,9 @@ func main() {
 		Library: make(map[string]func(*config.State, config.Command) error),
 	}
 	cmds.Register("login", config.HandlerLogin)
+	cmds.Register("register", config.HandlerRegister)
+	cmds.Register("reset", config.HandlerReset)
+	cmds.Register("users", config.HandlerGetUsers)
 
 	args := os.Args
 	if len(args) < 2 {
