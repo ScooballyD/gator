@@ -19,6 +19,69 @@ type Commands struct {
 	Library map[string]func(*State, Command) error
 }
 
+func HandlerAddFeed(s *State, cmd Command) error {
+	if len(cmd.Arguments) < 2 {
+		return fmt.Errorf("addfeed takes two arguments: name, url")
+	}
+
+	usr, err := s.dbq.GetUser(context.Background(), s.point.Current_user_name)
+	if err != nil {
+		return fmt.Errorf("unable to find current user: %v", err)
+	}
+
+	feed, err := s.dbq.CreateFeed(
+		context.Background(),
+		database.CreateFeedParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Name:      cmd.Arguments[0],
+			Url:       cmd.Arguments[1],
+			UserID:    usr.ID,
+		})
+	if err != nil {
+		return fmt.Errorf("unable to create feed: %v", err)
+	}
+	fmt.Printf(
+		"Feed successfully created\nID: %v\nCreatedAt: %v\nName: %v\nUrl: %v\nUserID: %v",
+		feed.ID, feed.CreatedAt, feed.Name, feed.Url, feed.UserID)
+	return nil
+}
+
+func HandlerAggregate(s *State, cmd Command) error {
+	if len(cmd.Arguments) > 0 {
+		return fmt.Errorf("the agg handler takes no arguments")
+	}
+
+	feed, err := s.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("fetching error: %v", err)
+	}
+
+	fmt.Println(feed)
+	return nil
+}
+
+func HandlerGetFeeds(s *State, cmd Command) error {
+	if len(cmd.Arguments) > 0 {
+		return fmt.Errorf("the feeds handler takes no arguments")
+	}
+
+	feeds, err := s.dbq.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("unable to retrieve feeds: %v", err)
+	}
+
+	for _, feed := range feeds {
+		usrName, err := s.dbq.MatchUser(context.Background(), feed.UserID)
+		if err != nil {
+			return fmt.Errorf("unable to match user to feed: %v", err)
+		}
+		fmt.Printf("Feed: %v\n	-URL: %v\n	-User Name: %v\n", feed.Name, feed.Url, usrName)
+	}
+	return nil
+}
+
 func HandlerGetUsers(s *State, cmd Command) error {
 	if len(cmd.Arguments) > 0 {
 		return fmt.Errorf("the users handler takes no arguments")

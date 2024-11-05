@@ -91,6 +91,18 @@ func (q *Queries) GetUsers(ctx context.Context) ([]string, error) {
 	return items, nil
 }
 
+const matchUser = `-- name: MatchUser :one
+SELECT name FROM users
+WHERE id = $1
+`
+
+func (q *Queries) MatchUser(ctx context.Context, id uuid.UUID) (string, error) {
+	row := q.db.QueryRowContext(ctx, matchUser, id)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
+
 const resetUsers = `-- name: ResetUsers :exec
 DELETE FROM users
 `
