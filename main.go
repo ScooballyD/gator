@@ -29,8 +29,12 @@ func main() {
 	cmds.Register("reset", config.HandlerReset)
 	cmds.Register("users", config.HandlerGetUsers)
 	cmds.Register("agg", config.HandlerAggregate)
-	cmds.Register("addfeed", config.HandlerAddFeed)
+	cmds.Register("addfeed", config.MiddlewareLoggedIn(config.HandlerAddFeed))
 	cmds.Register("feeds", config.HandlerGetFeeds)
+	cmds.Register("follow", config.MiddlewareLoggedIn(config.HandlerFollow))
+	cmds.Register("following", config.MiddlewareLoggedIn(config.HandlerFollowing))
+	cmds.Register("unfollow", config.MiddlewareLoggedIn(config.HandlerUnfollow))
+	cmds.Register("browse", config.MiddlewareLoggedIn(config.HandlerBrowse))
 
 	args := os.Args
 	if len(args) < 2 {

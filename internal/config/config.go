@@ -75,20 +75,17 @@ func (cfg Config) SetUser(user string) error {
 
 	jData, err := json.Marshal(cfg)
 	if err != nil {
-		//fmt.Println("Marshal error : ", err)
 		return fmt.Errorf("marshal error: %v", err)
 	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
-		//fmt.Println("Unable to find home dir : ", err)
 		return fmt.Errorf("unable to find home dir: %v", err)
 	}
 
 	path := home + "/" + configFileName
 	err = os.WriteFile(path, jData, 0666)
 	if err != nil {
-		//fmt.Println("Write error : ", err)
 		return fmt.Errorf("write error: %v", err)
 	}
 

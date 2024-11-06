@@ -12,3 +12,18 @@ RETURNING *;
 
 -- name: GetFeeds :many
 SELECT * FROM feeds;
+
+-- name: GetFeed :one
+SELECT * FROM feeds
+WHERE url = $1;
+
+-- name: MarkFeedFetched :one
+UPDATE feeds
+SET last_fetched_at = CURRENT_TIMESTAMP,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+RETURNING *;
+
+-- name: GetNextFeedToFetch :one
+SELECT * FROM feedss
+ORDER BY last_fetched_at DESC NULLS FIRST;
